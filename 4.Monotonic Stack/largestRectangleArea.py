@@ -1,17 +1,14 @@
-def largestRectangleArea(heights):
-    stack = []  # indices, heights are strictly increasing
-    max_area = 0
-    arr = heights + [0]  # sentinel to flush
-
-    for i, h in enumerate(arr):
-        while stack and arr[stack[-1]] > h:
-            top = stack.pop()
-            height = arr[top]
-            left_smaller = stack[-1] if stack else -1
-            width = i - left_smaller - 1
-            max_area = max(max_area, height * width)
-        stack.append(i)
-    return max_area
+def maxChunksToSorted(arr):
+    st = []
+    for x in arr:
+        if not st or st[-1] <= x:
+            st.append(x)
+        else:
+            mx = st.pop()
+            while st and st[-1] > x:
+                st.pop()
+            st.append(mx)
+    return len(st)
 
 
-print(largestRectangleArea([3, 2, 1, 1, 1]))
+print(maxChunksToSorted([1, 3, 5, 4, 2]))
