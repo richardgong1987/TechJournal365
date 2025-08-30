@@ -1,2 +1,1 @@
-from typing import List
-
+print([3, 6] > [3, 2, 80])

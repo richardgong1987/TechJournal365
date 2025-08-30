@@ -1,42 +1,45 @@
 class Solution:
     def maxNumber(self, nums1, nums2, k):
-        m, n = len(nums1), len(nums2)
-        best = []
-        for i in range(max(0, k - n), min(k, m) + 1):
-            a1 = pick_max(nums1, i)
-            a2 = pick_max(nums2, k - i)
-            cand = merge(a1, a2)
-            if cand > best:
-                best = cand
-        return best
+        n = len(nums1)
+        m = len(nums2)
+
+        better_choice = []
+
+        for i in range(max(0, k - n), min(k, m)):
+            result1 = get_monotonic_array(nums1, k - i)
+            result2 = get_monotonic_array(nums2, i)
+            merged_arr = merge(result1, result2)
+            if merged_arr > better_choice:
+                better_choice = merged_arr
+
+        return better_choice
 
 
-def pick_max(arr, t):
-    """Monotonic decreasing stack: keep the best length-t subsequence."""
-    drops = len(arr) - t
-    st = []
-    for x in arr:
-        while drops and st and st[-1] < x:
-            st.pop()
-            drops -= 1
-        st.append(x)
-    return st[:t]
-
-
-def merge(a, b):
-    """Greedy merge by lexicographic suffix."""
-    i = j = 0
+def merge(arr1, arr2):
     out = []
-    while i < len(a) or j < len(b):
-        if a[i:] > b[j:]:  # Python does lexicographic list compare
-            out.append(a[i])
-            i += 1
+    left = right = 0
+    while left < len(arr1) or right < len(arr2):
+        if arr1[left:] > arr2[right:]:
+            out.append(arr1[left])
+            left += 1
         else:
-            out.append(b[j])
-            j += 1
+            out.append(arr2[right])
+            right += 1
     return out
 
 
-s = Solution()
-print(s.maxNumber(nums1=[3, 4, 6, 5], nums2=[9, 1, 2, 5, 8, 3], k=5))
+def get_monotonic_array(arr, take):
+    should_drops = len(arr) - take
+    stack = []
+    for v in arr:
+        while should_drops and stack and stack[-1] < v:
+            stack.pop()
+            should_drops -= 1
 
+        stack.append(v)
+
+    return stack[:take]
+
+
+s = Solution()
+print(s.maxNumber(nums1=[6,7], nums2=[6,0,4], k=5))
