@@ -14,7 +14,6 @@ class Solution:
 
         return better_choice
 
-
 def merge(arr1, arr2):
     out = []
     left = right = 0
