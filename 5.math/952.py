@@ -19,7 +19,6 @@ class DSU:
             ra, rb = rb, ra
         self.parent[rb] = ra
         self.size[ra] += self.size[rb]
-        return self.size[ra]
 
 
 def build_spf(limit):
