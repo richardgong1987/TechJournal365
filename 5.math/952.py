@@ -1,44 +1,52 @@
-from collections import defaultdict
+from typing import List
 
+class UF:
+    def __init__(self, n: int):
+        self._parent = list(range(n))
+        self._size = [1] * n
 
-class DSU:
-    def __init__(self, n):
-        self.parent = list(range(n))
-        self.size = [1] * n
-
-    def find(self, x):
-        while self.parent[x] != x:
-            self.parent[x] = self.parent[self.parent[x]]
-            x = self.parent[x]
+    def find(self, x: int) -> int:
+        while self._parent[x] != x:
+            self._parent[x] = self._parent[self._parent[x]]
+            x = self._parent[x]
         return x
 
-    def union(self, a, b):
-        ra, rb = self.find(a), self.find(b)
-        if ra == rb: return self.size[ra]
-        if self.size[ra] < self.size[rb]:
-            ra, rb = rb, ra
-        self.parent[rb] = ra
-        self.size[ra] += self.size[rb]
+    def get_size(self, x: int) -> int:
+        return self._size[self.find(x)]
+
+    def union(self, a: int, b: int):
+        a_root = self.find(a)
+        b_root = self.find(b)
+        if a_root == b_root:
+            return
+        if self._size[a_root] < self._size[b_root]:
+            a_root, b_root = b_root, a_root
+
+        self._parent[b_root] = a_root
+        self._size[a_root] += self._size[b_root]
 
 
-def build_spf(limit):
-    spf = list(range(limit + 1))
-    for i in range(2, int(limit ** 0.5) + 1):
-        if spf[i] == i:
-            step = i
-            for x in range(i * i, limit + 1, step):
-                if spf[x] == x:
-                    spf[x] = i
+def build_SPF(num: int) -> List[int]:
+    spf = list(range(num + 1))
+    for n in range(2, int(num ** 0.5) + 1):
+        if spf[n] == n:
+            for n2 in range(n * n, num + 1, n):
+                if spf[n2] == n2:
+                    spf[n2] = n
+
     return spf
 
 
-def factor_distinct_primes(x, spf):
+def factor_distinct_primes(num: int, spf: List[int]) -> set[int]:
     ps = set()
-    while x > 1:
-        p = spf[x]
+
+    while num > 1:
+        p = spf[num]
         ps.add(p)
-        while x % p == 0:
-            x //= p
+
+        while num % p == 0:
+            num = num // p
+
     return ps
 
 
@@ -46,25 +54,19 @@ class Solution:
     def largestComponentSize(self, nums):
         n = len(nums)
         if n <= 1: return n
-        maxA = max(nums)
-        spf = build_spf(maxA)
 
-        dsu = DSU(n)
-        first_idx = {}  # prime -> first index seen
+        uf = UF(n)
+        max_num = max(nums)
+        SPF = build_SPF(max_num)
+        first_seen = {}
 
         for i, val in enumerate(nums):
-            for p in factor_distinct_primes(val, spf):
-                if p in first_idx:
-                    dsu.union(i, first_idx[p])
+            for p in factor_distinct_primes(val, SPF):
+                if p in first_seen:
+                    uf.union(i, first_seen[p])
                 else:
-                    first_idx[p] = i
-
-        # Count sizes per root
-        count = defaultdict(int)
-        best = 0
+                    first_seen[p] = i
+        max_len = 1
         for i in range(n):
-            r = dsu.find(i)
-            count[r] += 1
-            if count[r] > best:
-                best = count[r]
-        return best
+            max_len = max(max_len, uf.get_size(i))
+        return max_len
